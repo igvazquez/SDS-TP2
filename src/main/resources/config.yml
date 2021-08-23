@@ -1,0 +1,16 @@
+randomize: true
+
+# N, L
+totalParticles: 1000
+boardLength: 150.0
+
+# Archivos de entrada
+staticFile: "sds-tp2/src/main/resources/newStatic.txt"
+dynamicFile: "sds-tp2/src/main/resources/newDynamic.txt"
+
+# Rc y condición de borde
+radius: 5.0
+periodicOutline: false
+
+# Default: output.txt
+fileName: ""

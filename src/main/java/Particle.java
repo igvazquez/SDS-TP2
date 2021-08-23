@@ -4,17 +4,25 @@ public class Particle {
 
     private final long id;
     private final State state;
+    private final double radius;
 
-    public Particle(long id, double x, double y, double vx, double vy) {
+    public Particle(long id, double x, double y, double radius) {
         this.id = id;
-        this.state = new State(x, y, vx, vy);
+        this.radius = radius;
+        this.state = new State(x, y);
+    }
+
+    public Particle(long id, double x, double y, double radius, double v, double theta) {
+        this.id = id;
+        this.radius = radius;
+        this.state = new State(x, y, v, theta);
     }
 
     public double calculateDistance(Particle p, double L, boolean periodicOutline) {
         double x = distanceFromAxis(getX(), p.getX(), L, periodicOutline);
         double y = distanceFromAxis(getY(), p.getY(), L, periodicOutline);
 
-        return Math.sqrt(x*x + y*y);
+        return Math.sqrt(x*x + y*y) - radius - p.getRadius();
     }
 
     private double distanceFromAxis(double ax1, double ax2, double L, boolean periodicOutline){
@@ -44,17 +52,21 @@ public class Particle {
         return state.y;
     }
 
+    public double getRadius() {
+        return radius;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Particle)) return false;
         Particle particle = (Particle) o;
-        return id == particle.id && Objects.equals(state, particle.state);
+        return id == particle.id && radius == particle.radius && Objects.equals(state, particle.state);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, state);
+        return Objects.hash(id, state, radius);
     }
 
     @Override
@@ -63,6 +75,7 @@ public class Particle {
                 "id=" + id +
                 ", x=" + state.x +
                 ", y=" + state.y +
+                ", radius=" + radius +
                 '}';
     }
 
@@ -70,18 +83,18 @@ public class Particle {
 
         private double x;
         private double y;
-        private double vx;
-        private double vy;
+        private double v;
+        private double theta;
 
         public State(double x, double y) {
             this.x = x;
             this.y = y;
         }
 
-        public State(double x, double y, double vx, double vy) {
+        public State(double x, double y, double v, double theta) {
             this(x,y);
-            this.vx = vx;
-            this.vy = vy;
+            this.v = v;
+            this.theta = theta;
         }
 
         public double getX() {
@@ -92,12 +105,12 @@ public class Particle {
             return y;
         }
 
-        public double getVX() {
-            return vx;
+        public double getV() {
+            return v;
         }
 
         public double getVY() {
-            return vy;
+            return theta;
         }
 
         public void setX(double x) {
@@ -109,11 +122,11 @@ public class Particle {
         }
 
         public void setVX(double vx) {
-            this.vx = vx;
+            this.v = vx;
         }
 
         public void setVY(double vy) {
-            this.vy = vy;
+            this.theta = vy;
         }
     }
 }
