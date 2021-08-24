@@ -3,7 +3,7 @@ import java.util.Objects;
 public class Particle {
 
     private final long id;
-    private final State state;
+    private State state;
     private final double radius;
 
     public Particle(long id, double x, double y, double radius) {
@@ -36,6 +36,40 @@ public class Particle {
         return distance;
     }
 
+    public void nextState(double newTheta, double L, boolean periodicOutline){
+        this.state = new State(
+          nextPosition(state.x + getVX(), L, periodicOutline),
+          nextPosition(state.y + getVY(), L, periodicOutline),
+          state.v,
+          newTheta < 0 ? newTheta + Math.PI : newTheta
+        );
+    }
+
+    public double getVX() {
+        return Math.cos(state.theta) * state.v;
+    }
+
+    public double getVY() {
+        return Math.sin(state.theta) * state.v;
+    }
+
+    public double getVMod() {
+        return Math.sin(state.theta) * state.v;
+    }
+
+    private double nextPosition(double coordinate, double L, boolean periodicOutline){
+        double ret = coordinate;
+
+        if(periodicOutline) {
+            if(coordinate >= L) {
+                ret = coordinate - L;
+            } else if(coordinate < 0) {
+                ret = coordinate + L;
+            }
+        }
+        return ret;
+    }
+
     public long getId() {
         return id;
     }
@@ -54,6 +88,10 @@ public class Particle {
 
     public double getRadius() {
         return radius;
+    }
+
+    public double getTheta(){
+        return state.theta;
     }
 
     @Override

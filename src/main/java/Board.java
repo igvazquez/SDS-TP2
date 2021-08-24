@@ -8,25 +8,26 @@ public class Board {
     private final double L;
     private final int M;
     private final List<Particle> particles;
-    final Map<Integer, List<Particle>> cells;
+    Map<Integer, List<Particle>> cells;
 
     public Board(double l, int m, List<Particle> particles) {
         L = l;
         M = m;
         this.particles = particles;
-        this.cells = divideParticles(particles);
-    }
-
-    private Map<Integer, List<Particle>> divideParticles(List<Particle> particles){
-        Map<Integer, List<Particle>> cells = new HashMap<>();
+        this.cells = new HashMap<>();
         for (int i = 0; i < M * M; i++) {
             cells.put(i, new ArrayList<>());
         }
+        divideParticles(particles);
+    }
+
+    public Map<Integer, List<Particle>> divideParticles(List<Particle> particles){
+
         for(Particle p : particles){
             if (p.getX() < 0 || p.getX() > L || p.getY() < 0 || p.getY() > L){
-//                System.out.println(L);
-//                System.out.println(p.getX());
-//                System.out.println(p.getY());
+                System.out.println(L);
+                System.out.println(p.getX());
+                System.out.println(p.getY());
                 throw new IllegalArgumentException();
             }
             cells.get(calculateCellIndexOnBoard(p.getX(), p.getY())).add(p);

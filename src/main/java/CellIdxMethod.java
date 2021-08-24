@@ -19,20 +19,6 @@ public class CellIdxMethod {
         for (int i = 0; i < M * M; i++) {
             neighboursMap.put(i, new HashSet<>());
         }
-        for (int i=0; i<M*M; i++) {
-            int row = i/M;
-            int col = i%M;
-            //add this cell particles as neighbours
-            addNeighboursToCells(neighboursMap, i, i);
-            //add right neighbours
-            addNeighboursToCells(neighboursMap, i, getRightIndex(i, row, col, per));
-            //add upper right neighbours
-            addNeighboursToCells(neighboursMap, i, getUpperRightIndex(row, col, per));
-            //add lower right neighbours
-            addNeighboursToCells(neighboursMap, i, getLowerRightIndex(row, col, per));
-            //add lower neighbours
-            addNeighboursToCells(neighboursMap, i, getLowerIndex(row, col, per));
-        }
     }
 
     private int getRightIndex(int currentCellIndex, int row, int col, boolean periodicOutline) {
@@ -114,5 +100,28 @@ public class CellIdxMethod {
             }
         }
         return ret;
+    }
+
+    public Map<Integer, Set<Particle>> calculateNeighbours(){
+        for (int i=0; i<M*M; i++) {
+            int row = i/M;
+            int col = i%M;
+            //add this cell particles as neighbours
+            addNeighboursToCells(neighboursMap, i, i);
+            //add right neighbours
+            addNeighboursToCells(neighboursMap, i, getRightIndex(i, row, col, per));
+            //add upper right neighbours
+            addNeighboursToCells(neighboursMap, i, getUpperRightIndex(row, col, per));
+            //add lower right neighbours
+            addNeighboursToCells(neighboursMap, i, getLowerRightIndex(row, col, per));
+            //add lower neighbours
+            addNeighboursToCells(neighboursMap, i, getLowerIndex(row, col, per));
+        }
+
+        return neighboursMap;
+    }
+
+    public Board getBoard() {
+        return board;
     }
 }

@@ -1,8 +1,9 @@
 randomize: true
 
-# N, L
+# N, L, eta
 totalParticles: 1000
 boardLength: 150.0
+eta: 0.1
 
 # Archivos de entrada
 staticFile: "sds-tp2/src/main/resources/newStatic.txt"
