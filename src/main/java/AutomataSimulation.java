@@ -55,6 +55,7 @@ public class AutomataSimulation {
 
         final List<Board> automataStates = automata.run(board);
 
+
         System.out.println("holi");
     }
 

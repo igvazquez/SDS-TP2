@@ -53,9 +53,7 @@ public class Particle {
         return Math.sin(state.theta) * state.v;
     }
 
-    public double getVMod() {
-        return Math.sin(state.theta) * state.v;
-    }
+    public double getVMod() { return Math.sqrt(Math.pow(getVX(), 2) + Math.pow(getVY(), 2)); }
 
     private double nextPosition(double coordinate, double L, boolean periodicOutline){
         double ret = coordinate;
@@ -69,6 +67,7 @@ public class Particle {
         }
         return ret;
     }
+
 
     public long getId() {
         return id;
