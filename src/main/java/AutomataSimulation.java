@@ -10,7 +10,7 @@ public class AutomataSimulation {
     private final static String outputName = "output";
     private static Map<String, Object> data;
     private static Board board;
-    private static int M;
+    private static double rc;
 
     public static void main(String[] args) {
 
@@ -24,45 +24,43 @@ public class AutomataSimulation {
         Yaml yaml = new Yaml();
         data = yaml.load(inputStream);
         if(data.isEmpty()) {
-            throw new IllegalArgumentException("No se han detectado argumentos. Ingrese 'ayuda' para más información.");
+            throw new IllegalArgumentException("No se han detectado argumentos.");
         }
 
-        double rc = (double) data.get("radius");
+        rc = (double) data.get("radius");
         double eta = (double) data.get("eta");
         boolean per = (boolean) data.get("periodicOutline");
+        double v = (double) data.get("absV");
 
-//        if((boolean)data.get("randomize")) {
-//            int n = (int) data.get("totalParticles");
-//            double l = (double) data.get("boardLength");
-//            int m = optM(rc,l);
-//            board = Board.getRandomBoardFile(n,l,m,0);
-//        } else {
-//            board = inputBoard((String)data.get("staticFile"), (String)data.get("dynamicFile"));
-//        }
-//
+        if((boolean)data.get("randomize")) {
+            int n = (int) data.get("totalParticles");
+            double l = (double) data.get("boardLength");
+            int m = optM(l);
+            board = Board.getRandomBoardFile(n,l,m,0, v);
+        } else {
+            board = inputBoard((String)data.get("staticFile"), (String)data.get("dynamicFile"));
+        }
+
 //        String out = (String) data.get("fileName");
 //        if(out.isEmpty()) {
 //            out = outputName;
 //        }
 
-        Particle p1 = new Particle(1,0,0,0,0.03,1.5708);
-        Particle p2 = new Particle(2,0.5,0,0,0.03,3.92699);
-        Particle p3 = new Particle(3,0.5,0.5,0,0.03,2.35619);
-        Particle p4 = new Particle(4,0,0.5,0,0.03,0.785398);
-        List<Particle> particles = Arrays.asList(p1,p2,p3,p4);
-        board = new Board(2,2,particles);
-        final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board);
+//        Particle p1 = new Particle(1,0.4,0,0,0.03,1.5708);
+//        Particle p2 = new Particle(2,0.5,0,0,0.03,3.92699);
+//        Particle p3 = new Particle(3,0.5,0.5,0,0.03,2.35619);
+//        Particle p4 = new Particle(4,0,0.5,0,0.03,0.785398);
+//        List<Particle> particles = Arrays.asList(p1,p2,p3,p4);
+//        board = new Board(2,1,particles);
 
-        final List<Board> automataStates = automata.run(board);
+        final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v);
 
-
-        System.out.println("holi");
+        int i = (int) data.get("iterations");
+        List<Particle> result = automata.run(i);
     }
 
-    private static int optM(double rc, double l) {
-        int m = (int)Math.floor(l/rc);
-        System.out.println("M óptimo: "+m);
-        return m;
+    private static int optM(double l) {
+        return (int)Math.floor(l/rc);
     }
 
     private static Board inputBoard(String staticFile, String dynamicFile) {
@@ -84,24 +82,26 @@ public class AutomataSimulation {
             }
 
             if (din.hasNext("t.")) {     // t0
-                din.next();
+                din.nextLine();
+            } else {
+                throw new IllegalArgumentException("No se encontraron las condiciones iniciales.");
             }
 
             List<Particle> particles = new ArrayList<>();
             for (int i = 0; i < n && st.hasNextLine() && din.hasNextLine(); i++) {
-                double x = 0, y = 0, r = 0;
+                double x = 0, y = 0, v = 0, r = 0, theta = 0;
                 if (din.hasNextLine()) {
                     x = din.nextDouble();
                     y = din.nextDouble();
-                    din.nextLine(); // el resto de los datos no los usamos por ahora
+                    double vx = din.nextDouble();
+                    double vy = din.nextDouble();
+                    v = Math.sqrt(Math.pow(vx,2) + Math.pow(vy,2));
+                    theta = Math.atan2(vy,vx);
+                    din.nextLine();
                 }
-                if (st.hasNextLine()) {
-                    r = st.nextDouble();
-                }
-                particles.add(new Particle(i, x, y, r));
+                particles.add(new Particle(i, x, y, r, v, theta));
             }
-//            System.out.println("L "+l);
-            return new Board(l, M, particles);
+            return new Board(l, optM(l), particles);
         }
         return null;
     }

@@ -9,50 +9,39 @@ public class OffLatticeAutomata {
     private final double eta;
     private final double rc;
     private final boolean periodicOutline;
-    private final CellIdxMethod cim;
-    private static final double fixedV = 0.03;
-    private int t;
+    private final double v;
+    private final Board board;
     private final ArrayList<VaEntry> vaEntries;
 
-    public OffLatticeAutomata(double l, double eta, double rc, boolean periodicOutline, Board initialBoard) {
+    public OffLatticeAutomata(double l, double eta, double rc, boolean periodicOutline, Board initialBoard, double v) {
         L = l;
-        t = 0;
-        this.eta = eta;
+        this.v = v;
         this.rc = rc;
-        this.periodicOutline = periodicOutline;
-        this.cim = new CellIdxMethod(initialBoard, rc, periodicOutline);
+        this.eta = eta;
+        this.board = initialBoard;
         this.vaEntries = new ArrayList<>();
+        this.periodicOutline = periodicOutline;
     }
 
-    public Board nextState(Board board){
+    public List<Particle> run(int lastFrame) {
         double vSum = 0;
-        List<Particle> nextState = new ArrayList<>();
-        for(Particle p : board.getParticles()){
-            vSum += p.getVMod();
-            List<Particle> neighbours = cim.getNeighboursOf(p);
-            double avgAngle = averageAngleVelocityOfParticles(neighbours);
-            p.nextState(avgAngle,L, periodicOutline);
-            nextState.add(p);
-        }
-        calculateVa(vSum, board);
-        return new Board(L, board.getM(), nextState);
-    }
-
-    public List<Board> run(Board initialState) {
-        final List<Board> boards = new ArrayList<>();
-
-        Board prevBoard = initialState;
-        cim.calculateNeighbours();
-        boards.add(prevBoard);
-        int i = 0;
-        while(i<100) {
-            prevBoard = nextState(prevBoard);
+        CellIdxMethod cim;
+        for(int timeFrame = 0; timeFrame < lastFrame; timeFrame++) {
+            cim = new CellIdxMethod(board, rc, periodicOutline);
             cim.calculateNeighbours();
-            boards.add(prevBoard);
-            i++;
+            for(Particle p : board.getParticles()) {
+                List<Double> angles = new ArrayList<>();
+                vSum += p.getV();
+                for(Particle neigh : cim.getNeighboursOf(p,timeFrame)) {
+                    angles.add(neigh.getState(timeFrame).getTheta());
+                }
+                double newTheta = averageAngleVelocityOfParticles(angles);
+                p.nextState(newTheta, L, periodicOutline, timeFrame);
+            }
+            board.sortBoard();
+            calculateVa(vSum, timeFrame);
         }
-
-        return boards;
+        return board.getParticles();
     }
 
     public List<VaEntry> getVas() {
@@ -71,28 +60,59 @@ public class OffLatticeAutomata {
         out.close();
     }
 
-    private double averageAngleVelocityOfParticles(final List<Particle> particles) {
-        double avgX = particles.stream().mapToDouble(Particle::getTheta)
-                .map(Math::sin).sorted().average().orElseThrow(IllegalStateException::new);
-        double avgY = particles.stream().mapToDouble(Particle::getTheta)
-                .map(Math::cos).sorted().average().orElseThrow(IllegalStateException::new);
+    private double averageAngleVelocityOfParticles(final List<Double> angles) {
+        double avgSin = angles.stream().mapToDouble(a -> a)
+                .map(Math::sin).average().orElse(0.0);
+        double avgCos = angles.stream().mapToDouble(a -> a)
+                .map(Math::cos).average().orElse(0.0);
 
         Random rand = new Random();
         return Math.atan2(
-                avgX,
-                avgY
+                avgSin,
+                avgCos
         ) + rand.nextDouble()*eta/2 - eta/2;
     }
 
-    private void calculateVa(double vSum, Board board) {
-        double va = 1.0/(board.getParticles().size() * fixedV) * vSum;
-        vaEntries.add(new VaEntry(t, va));
-        t++;
+    private void calculateVa(double vSum, int timeFrame) {
+        double va = 1.0/(board.getN() * v) * vSum;
+        vaEntries.add(new VaEntry(timeFrame, va));
     }
 
+
+//    public Board nextState(Board board){
+//        double vSum = 0;
+//        List<Particle> nextState = new ArrayList<>();
+//        for(Particle p : board.getParticles()){
+//            vSum += p.getV();
+//            List<Particle> neighbours = cim.getNeighboursOf(p);
+//            double avgAngle = averageAngleVelocityOfParticles(neighbours);
+//            p.nextState(avgAngle,L, periodicOutline);
+//            nextState.add(p);
+//        }
+//        calculateVa(vSum, board);
+//        return new Board(L, board.getM(), nextState);
+//    }
+//
+//    public List<Board> run(Board initialState) {
+//        final List<Board> boards = new ArrayList<>();
+//
+//        Board prevBoard = initialState;
+//        cim.calculateNeighbours();
+//        boards.add(prevBoard);
+//        int i = 0;
+//        while(i<100) {
+//            prevBoard = nextState(prevBoard);
+//            cim.calculateNeighbours();
+//            boards.add(prevBoard);
+//            i++;
+//        }
+//
+//        return boards;
+//    }
+
     private static class VaEntry {
-        private int t;
-        private double va;
+        private final int t;
+        private final double va;
 
         public VaEntry(int t, double va) {
             this.t = t;
