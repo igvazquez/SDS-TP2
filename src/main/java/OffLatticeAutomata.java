@@ -23,7 +23,7 @@ public class OffLatticeAutomata {
         this.periodicOutline = periodicOutline;
     }
 
-    public List<Particle> run(int lastFrame) {
+    public void run(int lastFrame) {
         double vSum = 0;
         CellIdxMethod cim;
         for(int timeFrame = 0; timeFrame < lastFrame; timeFrame++) {
@@ -41,7 +41,6 @@ public class OffLatticeAutomata {
             board.sortBoard();
             calculateVa(vSum, timeFrame);
         }
-        return board.getParticles();
     }
 
     public List<VaEntry> getVas() {

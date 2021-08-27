@@ -1,15 +1,10 @@
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class AutomataSimulation {
 
-    private final static String outputName = "output";
-    private static Map<String, Object> data;
-    private static Board board;
     private static double rc;
 
     public static void main(String[] args) {
@@ -22,7 +17,7 @@ public class AutomataSimulation {
         }
 
         Yaml yaml = new Yaml();
-        data = yaml.load(inputStream);
+        Map<String, Object> data = yaml.load(inputStream);
         if(data.isEmpty()) {
             throw new IllegalArgumentException("No se han detectado argumentos.");
         }
@@ -32,31 +27,22 @@ public class AutomataSimulation {
         boolean per = (boolean) data.get("periodicOutline");
         double v = (double) data.get("absV");
 
-        if((boolean)data.get("randomize")) {
+        Board board;
+        if((boolean) data.get("randomize")) {
             int n = (int) data.get("totalParticles");
             double l = (double) data.get("boardLength");
             int m = optM(l);
             board = Board.getRandomBoardFile(n,l,m,0, v);
         } else {
-            board = inputBoard((String)data.get("staticFile"), (String)data.get("dynamicFile"));
+            board = inputBoard((String) data.get("staticFile"), (String) data.get("dynamicFile"));
         }
 
-//        String out = (String) data.get("fileName");
-//        if(out.isEmpty()) {
-//            out = outputName;
-//        }
-
-//        Particle p1 = new Particle(1,0.4,0,0,0.03,1.5708);
-//        Particle p2 = new Particle(2,0.5,0,0,0.03,3.92699);
-//        Particle p3 = new Particle(3,0.5,0.5,0,0.03,2.35619);
-//        Particle p4 = new Particle(4,0,0.5,0,0.03,0.785398);
-//        List<Particle> particles = Arrays.asList(p1,p2,p3,p4);
-//        board = new Board(2,1,particles);
-
+        assert board != null;
         final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v);
 
         int i = (int) data.get("iterations");
-        List<Particle> result = automata.run(i);
+        automata.run(i);
+        visual(board.getParticles(), i);
     }
 
     private static int optM(double l) {
@@ -104,5 +90,28 @@ public class AutomataSimulation {
             return new Board(l, optM(l), particles);
         }
         return null;
+    }
+
+    private static void visual(List<Particle> particles, int frames) {
+        String fileName = "positions";
+        try {
+            FileWriter pos = new FileWriter(fileName + ".xyz", false);
+            BufferedWriter buffer = new BufferedWriter(pos);
+            for(int timeFrame=0; timeFrame<=frames; timeFrame++) {
+                buffer.write(String.valueOf(particles.size()));
+                buffer.newLine();
+                buffer.newLine();
+                for(Particle p : particles) {
+                    buffer.write(p.getId() + " " + p.getState(timeFrame).getX() + " " + p.getState(timeFrame).getY() + " " + p.getState(timeFrame).getVX() + " " + p.getState(timeFrame).getVY());
+                    buffer.newLine();
+                }
+            }
+            buffer.flush();
+            buffer.close();
+            pos.close();
+            System.out.println("Resultados en "+ fileName + ".xyz");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

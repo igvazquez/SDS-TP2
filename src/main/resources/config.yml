@@ -1,20 +1,20 @@
 randomize: true
 
 # Total time steps
-iterations: 1
+iterations: 300
 
 # N, L, eta
-totalParticles: 300
-boardLength: 7.0
+totalParticles: 10
+boardLength: 50.0
 eta: 2.0
-absV: 0.03
+absV: 1.3
 
 # Archivos de entrada
 staticFile: "sds-tp2/src/main/resources/newStatic.txt"
 dynamicFile: "sds-tp2/src/main/resources/newDynamic.txt"
 
 # Rc y condición de borde
-radius: 1.0
+radius: 7.0
 periodicOutline: true
 
 # Default: output.txt
