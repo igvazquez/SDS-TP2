@@ -1,60 +1,28 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Particle {
 
     private final long id;
-    private State state;
-    private final double radius;
-
-    public Particle(long id, double x, double y, double radius) {
-        this.id = id;
-        this.radius = radius;
-        this.state = new State(x, y);
-    }
+    private final double radius, v;
+    private final List<State> states;
 
     public Particle(long id, double x, double y, double radius, double v, double theta) {
         this.id = id;
         this.radius = radius;
-        this.state = new State(x, y, v, theta);
+        this.v = v;
+        states = new ArrayList<>();
+        states.add(new State(x,y,v,theta));
     }
 
-    public double calculateDistance(Particle p, double L, boolean periodicOutline) {
-        double x = distanceFromAxis(getX(), p.getX(), L, periodicOutline);
-        double y = distanceFromAxis(getY(), p.getY(), L, periodicOutline);
-
-        return Math.sqrt(x*x + y*y) - radius - p.getRadius();
-    }
-
-    private double distanceFromAxis(double ax1, double ax2, double L, boolean periodicOutline){
-        double distance = Math.abs(ax1 - ax2);
-
-        if (periodicOutline){
-            if(distance > L/2){
-                distance = L - distance;
-            }
-        }
-        return distance;
-    }
-
-    public void nextState(double newTheta, double L, boolean periodicOutline){
-        this.state = new State(
-          nextPosition(state.x + getVX(), L, periodicOutline),
-          nextPosition(state.y + getVY(), L, periodicOutline),
-          state.v,
-          newTheta < 0 ? newTheta + Math.PI : newTheta
-        );
-    }
-
-    public double getVX() {
-        return Math.cos(state.theta) * state.v;
-    }
-
-    public double getVY() {
-        return Math.sin(state.theta) * state.v;
-    }
-
-    public double getVMod() {
-        return Math.sin(state.theta) * state.v;
+    public void nextState(double newTheta, double L, boolean periodicOutline, int lastFrame) {
+        State lastState = getState(lastFrame);
+        states.add(new State(nextPosition(lastState.getX() + lastState.getVX(), L, periodicOutline),
+                        nextPosition(lastState.getY() + lastState.getVY(), L, periodicOutline),
+                        this.v,
+//                steerAngle(newTheta, lastFrame)));
+                        newTheta));
     }
 
     private double nextPosition(double coordinate, double L, boolean periodicOutline){
@@ -70,68 +38,78 @@ public class Particle {
         return ret;
     }
 
-    public long getId() {
-        return id;
+//    private double steerAngle(double newTheta, int lastFrame) {
+//        return newTheta - getState(lastFrame).getTheta();
+//    }
+
+    private double distanceFromAxis(double ax1, double ax2, double L, boolean periodicOutline){
+        double distance = Math.abs(ax1 - ax2);
+
+        if (periodicOutline){
+            if(distance > L/2){
+                distance = L - distance;
+            }
+        }
+        return distance;
     }
 
-    public State getState() {
-        return state;
+    public double calculateDistance(Particle p, double L, boolean periodicOutline, int timeFrame) {
+        State state = getState(timeFrame);
+        double x = distanceFromAxis(state.getX(), p.getState(timeFrame).getX(), L, periodicOutline);
+        double y = distanceFromAxis(state.getY(), p.getState(timeFrame).getY(), L, periodicOutline);
+
+        return Math.sqrt(x*x + y*y) - this.radius - p.getRadius();
     }
 
-    public double getX(){
-        return state.x;
-    }
 
-    public double getY(){
-        return state.y;
-    }
+    // Getters
+    public long getId() { return id; }
+    public List<State> getStates() { return states; }
+    public State getState(int timeFrame) { return states.get(timeFrame); }
+    public State getLastState() { return states.get(states.size()-1); }
+    public double getV() { return v; }
+    public double getRadius() { return radius; }
 
-    public double getRadius() {
-        return radius;
-    }
-
-    public double getTheta(){
-        return state.theta;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Particle)) return false;
         Particle particle = (Particle) o;
-        return id == particle.id && radius == particle.radius && Objects.equals(state, particle.state);
+        return id == particle.id && radius == particle.radius && Objects.equals(states, particle.states);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, state, radius);
+        return Objects.hash(id, states, radius);
     }
 
     @Override
     public String toString() {
-        return "Particle{" +
-                "id=" + id +
-                ", x=" + state.x +
-                ", y=" + state.y +
-                ", radius=" + radius +
-                '}';
+        StringBuilder buffer = new StringBuilder("Particle{ ID = " + id + ", V = " + v + ", Radius = " + radius);
+        buffer.append("\n\tStates = { ");
+        int i=0;
+        for(State s : states) {
+            buffer.append("t");
+            buffer.append(i++);
+            buffer.append(s);
+        }
+        buffer.append(" }");
+        return buffer.toString();
     }
 
-    private static class State{
 
-        private double x;
-        private double y;
-        private double v;
-        private double theta;
+    public static class State{
 
-        public State(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
+        private final double x, y;
+        private final double vx, vy;
+        private final double theta;
 
         public State(double x, double y, double v, double theta) {
-            this(x,y);
-            this.v = v;
+            this.x = x;
+            this.y = y;
+            this.vx = v*Math.cos(theta);
+            this.vy = v*Math.sin(theta);
             this.theta = theta;
         }
 
@@ -143,28 +121,27 @@ public class Particle {
             return y;
         }
 
-        public double getV() {
-            return v;
-        }
-
-        public double getVY() {
+        public double getTheta() {
             return theta;
         }
 
-        public void setX(double x) {
-            this.x = x;
+        public double getVX() {
+            return vx;
         }
 
-        public void setY(double y) {
-            this.y = y;
+        public double getVY() {
+            return vy;
         }
 
-        public void setVX(double vx) {
-            this.v = vx;
-        }
-
-        public void setVY(double vy) {
-            this.theta = vy;
+        @Override
+        public String toString() {
+            return " [" +
+                    "x=" + x +
+                    ", y=" + y +
+                    ", vx=" + vx +
+                    ", vy=" + vy +
+                    ", theta=" + theta +
+                    "]";
         }
     }
 }

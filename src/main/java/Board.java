@@ -15,24 +15,24 @@ public class Board {
         M = m;
         this.particles = particles;
         this.cells = new HashMap<>();
+        sortBoard();
+    }
+
+    public void sortBoard() {
         for (int i = 0; i < M * M; i++) {
             cells.put(i, new ArrayList<>());
         }
-        divideParticles(particles);
+        divideParticles();
     }
 
-    public Map<Integer, List<Particle>> divideParticles(List<Particle> particles){
-
+//  public Map<Integer, List<Particle>> divideParticles(List<Particle> particles){
+    public void divideParticles(){
         for(Particle p : particles){
-            if (p.getX() < 0 || p.getX() > L || p.getY() < 0 || p.getY() > L){
-                System.out.println(L);
-                System.out.println(p.getX());
-                System.out.println(p.getY());
-                throw new IllegalArgumentException();
+            if (p.getLastState().getX() < 0 || p.getLastState().getX() > L || p.getLastState().getY() < 0 || p.getLastState().getY() > L){
+                throw new IllegalArgumentException("Partícula fuera de los límites.");
             }
-            cells.get(calculateCellIndexOnBoard(p.getX(), p.getY())).add(p);
+            cells.get(calculateCellIndexOnBoard(p.getLastState().getX(), p.getLastState().getY())).add(p);
         }
-        return cells;
     }
 
     public Integer calculateCellIndexOnBoard(double x, double y){
@@ -41,17 +41,16 @@ public class Board {
         return i + M*j;
     }
 
-    public static Board getRandomBoardFile(int n, double l, int m, double maxR) {
+    public static Board getRandomBoardFile(int n, double l, int m, double r, double v) {
 
         List<Particle> particles = new ArrayList<>();
 
         try {
-            FileWriter st = new FileWriter("sds-tp1/src/main/resources/newStatic.txt",false);
+            FileWriter st = new FileWriter("src/main/resources/newStatic.txt",false);
             BufferedWriter stBuffer = new BufferedWriter(st);
-            FileWriter dyn = new FileWriter("sds-tp1/src/main/resources/newDynamic.txt",false);
+            FileWriter dyn = new FileWriter("src/main/resources/newDynamic.txt",false);
             BufferedWriter dynBuffer = new BufferedWriter(dyn);
 
-//            System.out.println(n);
             stBuffer.write(String.valueOf(n));
             stBuffer.newLine();
             stBuffer.write(String.valueOf(l));
@@ -60,12 +59,13 @@ public class Board {
             dynBuffer.write("t0");
             dynBuffer.newLine();
 
-            double x, y, r;
+            double x, y, theta;
+
             int i;
             for (i = 0; i < n; i++) {
                 x = Math.random() * l;
                 y = Math.random() * l;
-                r = Math.random() * maxR;
+                theta = Math.random() * 2 * Math.PI;
 
                 dynBuffer.write(String.valueOf(x));
                 dynBuffer.write(" ");
@@ -75,7 +75,7 @@ public class Board {
                 stBuffer.write(String.valueOf(r));
                 stBuffer.newLine();
 
-                particles.add(new Particle(i, x, y, r));
+                particles.add(new Particle(i, x, y, r, v, theta));
             }
 
             stBuffer.flush();
@@ -93,19 +93,6 @@ public class Board {
         return new Board(l, m, particles);
     }
 
-    public static Board getRandomBoard(int n, double l, int m, double maxR) {
-        List<Particle> particles = new ArrayList<>();
-        double x, y, r;
-        int i;
-        for (i = 0; i < n; i++) {
-            x = Math.random() * l;
-            y = Math.random() * l;
-            r = Math.random() * maxR;
-            particles.add(new Particle(i, x, y, r));
-        }
-        return new Board(l, m, particles);
-    }
-
     public double getL() {
         return L;
     }
@@ -113,6 +100,8 @@ public class Board {
     public int getM() {
         return M;
     }
+
+    public int getN() { return particles.size(); }
 
     public List<Particle> getParticles() {
         return particles;

@@ -87,22 +87,23 @@ public class CellIdxMethod {
         }
     }
 
-    public List<Particle> getNeighboursOf(Particle particle) {
+    public List<Particle> getNeighboursOf(Particle particle, int timeFrame) {
         if (!board.getParticles().contains(particle)){
             throw new IllegalArgumentException("Particle does not belong to this board");
         }
         List<Particle> ret = new ArrayList<>();
-        int idx = board.calculateCellIndexOnBoard(particle.getX(), particle.getY());
+        int idx = board.calculateCellIndexOnBoard(particle.getState(timeFrame).getX(), particle.getState(timeFrame).getY());
         Set<Particle> neighbours = neighboursMap.get(idx);
         for (Particle n : neighbours){
-            if (particle.calculateDistance(n, board.getL(), per) < rc){
+            if (particle.calculateDistance(n, board.getL(), per, timeFrame) < rc){
                 ret.add(n);
             }
         }
         return ret;
     }
 
-    public Map<Integer, Set<Particle>> calculateNeighbours(){
+//  public Map<Integer, Set<Particle>> calculateNeighbours(){
+    public void calculateNeighbours(){
         for (int i=0; i<M*M; i++) {
             int row = i/M;
             int col = i%M;
@@ -117,8 +118,7 @@ public class CellIdxMethod {
             //add lower neighbours
             addNeighboursToCells(neighboursMap, i, getLowerIndex(row, col, per));
         }
-
-        return neighboursMap;
+//        return neighboursMap;
     }
 
     public Board getBoard() {
