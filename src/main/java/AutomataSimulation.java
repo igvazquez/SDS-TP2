@@ -7,7 +7,7 @@ public class AutomataSimulation {
 
     private static double rc;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         InputStream inputStream = null;
         try {
@@ -43,6 +43,7 @@ public class AutomataSimulation {
         int i = (int) data.get("iterations");
         automata.run(i);
         visual(board.getParticles(), i);
+        automata.writeVaCSV();
     }
 
     private static int optM(double l) {

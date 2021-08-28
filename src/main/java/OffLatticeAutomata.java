@@ -2,6 +2,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OffLatticeAutomata {
 
@@ -23,23 +24,27 @@ public class OffLatticeAutomata {
         this.periodicOutline = periodicOutline;
     }
 
-    public void run(int lastFrame) {
-        double vSum = 0;
+    public void run(int maxIterations) {
+
         CellIdxMethod cim;
-        for(int timeFrame = 0; timeFrame < lastFrame; timeFrame++) {
+        for(int timeFrame = 0; timeFrame < maxIterations; timeFrame++) {
+            if (timeFrame%100 == 0){
+                System.out.println("Iteracion: " + timeFrame);
+            }
             cim = new CellIdxMethod(board, rc, periodicOutline);
             cim.calculateNeighbours();
+            calculateVa(board.getParticles(), timeFrame);
             for(Particle p : board.getParticles()) {
                 List<Double> angles = new ArrayList<>();
-                vSum += p.getV();
                 for(Particle neigh : cim.getNeighboursOf(p,timeFrame)) {
-                    angles.add(neigh.getState(timeFrame).getTheta());
+                    if (p.calculateDistance(neigh, L, periodicOutline, timeFrame) < rc){
+                        angles.add(neigh.getState(timeFrame).getTheta());
+                    }
                 }
                 double newTheta = averageAngleVelocityOfParticles(angles);
                 p.nextState(newTheta, L, periodicOutline, timeFrame);
             }
             board.sortBoard();
-            calculateVa(vSum, timeFrame);
         }
     }
 
@@ -50,6 +55,7 @@ public class OffLatticeAutomata {
     public void writeVaCSV() throws IOException {
         FileWriter out = new FileWriter("va" + ".csv",false);
         BufferedWriter buffer = new BufferedWriter(out);
+        buffer.write("t,va\n");
         for(VaEntry va : vaEntries) {
             buffer.write(va.toString());
             buffer.newLine();
@@ -65,15 +71,20 @@ public class OffLatticeAutomata {
         double avgCos = angles.stream().mapToDouble(a -> a)
                 .map(Math::cos).average().orElse(0.0);
 
-        Random rand = new Random();
+        Random rand = new Random(System.currentTimeMillis());
         return Math.atan2(
                 avgSin,
                 avgCos
         ) + rand.nextDouble()*eta/2 - eta/2;
     }
 
-    private void calculateVa(double vSum, int timeFrame) {
-        double va = 1.0/(board.getN() * v) * vSum;
+    private void calculateVa(List<Particle> particles, int timeFrame) {
+        double vxSum = particles.stream().mapToDouble(p -> p.getState(timeFrame).getVX()).sum();
+        double vySum = particles.stream().mapToDouble(p -> p.getState(timeFrame).getVY()).sum();
+        double totalVSum = particles.stream().mapToDouble(Particle::getV).sum();
+
+        double va = Math.hypot(vxSum, vySum) / totalVSum;
+
         vaEntries.add(new VaEntry(timeFrame, va));
     }
 
@@ -116,6 +127,14 @@ public class OffLatticeAutomata {
         public VaEntry(int t, double va) {
             this.t = t;
             this.va = va;
+        }
+
+        public int getT() {
+            return t;
+        }
+
+        public double getVa() {
+            return va;
         }
 
         @Override

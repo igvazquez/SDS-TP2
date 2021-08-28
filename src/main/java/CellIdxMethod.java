@@ -11,10 +11,14 @@ public class CellIdxMethod {
 
     public CellIdxMethod(Board board, double rc, boolean per) {
         this.board = board;
-        this.rc = rc;
         this.per = per;
         M = board.getM();
 
+        if (rc < board.getL()/M){
+            throw new IllegalArgumentException("El radio de interaccion no puede ser mayor que L/M");
+        }
+
+        this.rc = rc;
         neighboursMap = new HashMap<>();
         for (int i = 0; i < M * M; i++) {
             neighboursMap.put(i, new HashSet<>());
