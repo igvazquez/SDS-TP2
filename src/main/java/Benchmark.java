@@ -45,17 +45,27 @@ public class Benchmark {
         benchmarkParticles.forEach(n ->{
             double eta = 0;
             for (int i = 0; i < simulations; i++) {
+                System.out.println("N = " + n);
+                System.out.println("sim = " + i);
                 Board board = Board.getRandomBoard(n,l,m,0, v);
                 OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v);
-                eta += etaStep;
                 automata.run(iterations);
                 double mean = automata.getMean();
-                buffer.write(n);
-                buffer.write(mean);
-                buffer.write(eta);
-                buffer.write(automata.getVaStdDev(mean));
+                try {
+                    buffer.write(n + ",");
+                    buffer.write(mean + ",");
+                    buffer.write(eta + ",");
+                    buffer.write(automata.getVaStdDev(mean) + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                eta += etaStep;
             }
         });
+
+        buffer.flush();
+        buffer.close();
+        benchmark.close();
     }
 
     private static int optM(double l) {

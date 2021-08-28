@@ -68,7 +68,7 @@ public class OffLatticeAutomata {
     }
 
     public double getMean(){
-        double mean = StatUtils.geometricMean(vaEntries.stream().filter(e -> e.t < vaEntries.size()/2)
+        return StatUtils.geometricMean(vaEntries.stream().filter(e -> e.t < vaEntries.size()/2)
                 .mapToDouble(VaEntry::getVa).toArray());
     }
 

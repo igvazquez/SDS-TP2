@@ -23,7 +23,7 @@ benchmark:
     - 10
     - 100
     - 400
-  simulations: 10
+  simulations: 50
 
 # Default: output.txt
 fileName: ""
