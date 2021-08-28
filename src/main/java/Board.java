@@ -93,6 +93,24 @@ public class Board {
         return new Board(l, m, particles);
     }
 
+    public static Board getRandomBoard(int n, double l, int m, double r, double v) {
+
+        List<Particle> particles = new ArrayList<>();
+
+        double x, y, theta;
+
+        int i;
+        for (i = 0; i < n; i++) {
+            x = Math.random() * l;
+            y = Math.random() * l;
+            theta = Math.random() * 2 * Math.PI;
+
+            particles.add(new Particle(i, x, y, r, v, theta));
+        }
+
+        return new Board(l, m, particles);
+    }
+
     public double getL() {
         return L;
     }

@@ -1,3 +1,5 @@
+import org.apache.commons.math3.stat.StatUtils;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -63,6 +65,16 @@ public class OffLatticeAutomata {
         buffer.flush();
         buffer.close();
         out.close();
+    }
+
+    public double getMean(){
+        double mean = StatUtils.geometricMean(vaEntries.stream().filter(e -> e.t < vaEntries.size()/2)
+                .mapToDouble(VaEntry::getVa).toArray());
+    }
+
+    public double getVaStdDev(double mean){
+        return StatUtils.variance(vaEntries.stream().filter(e -> e.t < vaEntries.size()/2)
+                .mapToDouble(VaEntry::getVa).toArray(), mean);
     }
 
     private double averageAngleVelocityOfParticles(final List<Double> angles) {
