@@ -37,14 +37,18 @@ public class OffLatticeAutomata {
             cim.calculateNeighbours();
             calculateVa(board.getParticles(), timeFrame);
             for(Particle p : board.getParticles()) {
+                double newTheta = p.getLastState().getTheta();
                 List<Double> angles = new ArrayList<>();
                 for(Particle neigh : cim.getNeighboursOf(p,timeFrame)) {
                     if (p.calculateDistance(neigh, L, periodicOutline, timeFrame) < rc){
                         angles.add(neigh.getState(timeFrame).getTheta());
                     }
                 }
-                double newTheta = averageAngleVelocityOfParticles(angles);
+                if(angles.size() > 0) {
+                    newTheta = averageAngleVelocityOfParticles(angles);
+                }
                 p.nextState(newTheta, L, periodicOutline, timeFrame);
+
             }
             board.sortBoard();
         }
@@ -87,7 +91,7 @@ public class OffLatticeAutomata {
         return Math.atan2(
                 avgSin,
                 avgCos
-        ) + rand.nextDouble()*eta/2 - eta/2;
+        ) + rand.nextDouble()*eta - eta/2;
     }
 
     private void calculateVa(List<Particle> particles, int timeFrame) {

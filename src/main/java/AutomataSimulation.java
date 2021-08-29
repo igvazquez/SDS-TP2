@@ -103,7 +103,7 @@ public class AutomataSimulation {
                 buffer.newLine();
                 buffer.newLine();
                 for(Particle p : particles) {
-                    buffer.write(p.getId() + " " + p.getState(timeFrame).getX() + " " + p.getState(timeFrame).getY() + " " + p.getState(timeFrame).getVX() + " " + p.getState(timeFrame).getVY());
+                    buffer.write(p.getId() + " " + p.getState(timeFrame).getX() + " " + p.getState(timeFrame).getY() + " " + p.getState(timeFrame).getVX() + " " + p.getState(timeFrame).getVY() + " " + p.getState(timeFrame).getTheta());
                     buffer.newLine();
                 }
             }

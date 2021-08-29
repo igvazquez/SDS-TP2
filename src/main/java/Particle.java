@@ -18,28 +18,31 @@ public class Particle {
 
     public void nextState(double newTheta, double L, boolean periodicOutline, int lastFrame) {
         State lastState = getState(lastFrame);
-        states.add(new State(nextPosition(lastState.getX() + lastState.getVX(), L, periodicOutline),
-                        nextPosition(lastState.getY() + lastState.getVY(), L, periodicOutline),
+//      states.add(new State(nextPosition(lastState.getX() + lastState.getVX(), L, periodicOutline),
+//                      nextPosition(lastState.getY() + lastState.getVY(), L, periodicOutline),
+        states.add(new State(nextPosition(lastState.getX(), lastState.getVX(), L),
+                        nextPosition(lastState.getY(), lastState.getVY(), L),
                         this.v,
-//                steerAngle(newTheta, lastFrame)));
                         newTheta));
     }
 
-    private double nextPosition(double coordinate, double L, boolean periodicOutline){
-        double ret = coordinate;
-
-        if(periodicOutline) {
-            if(coordinate >= L) {
-                ret = coordinate - L;
-            } else if(coordinate < 0) {
-                ret = coordinate + L;
-            }
-        }
-        return ret;
+    // SIEMPRE TIENE PERIODIC OUTLINE
+    private double nextPosition(double coord, double relV, double L) {
+        double aux = (coord + relV) % L;
+        return aux < 0 ? aux + L : aux;
     }
 
-//    private double steerAngle(double newTheta, int lastFrame) {
-//        return newTheta - getState(lastFrame).getTheta();
+//    private double nextPosition(double coordinate, double L, boolean periodicOutline){
+//        double ret = coordinate;
+//
+//        if(periodicOutline) {
+//            if(coordinate >= L) {
+//                ret = coordinate - L;
+//            } else if(coordinate < 0) {
+//                ret = coordinate + L;
+//            }
+//        }
+//        return ret;
 //    }
 
     private double distanceFromAxis(double ax1, double ax2, double L, boolean periodicOutline){
