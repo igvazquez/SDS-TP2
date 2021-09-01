@@ -47,7 +47,7 @@ public class Benchmark {
             for (int i = 0; i < simulations; i++) {
                 System.out.println("N = " + n);
                 System.out.println("sim = " + i);
-                Board board = Board.getRandomBoard(n,l,m,0, v, iterations);
+                Board board = Board.getRandomBoard(n,l,m,0, v);
                 OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v, iterations);
                 automata.run();
                 double mean = automata.getMean();

@@ -13,7 +13,7 @@ public class OffLatticeAutomata {
     private final boolean periodicOutline;
     private final double v;
     private final int iterations;
-    private final List<Particle> states;
+    private final List<List<Particle>> states;
     private final Board board;
     private final List<Double> vaEntries;
 
@@ -32,6 +32,7 @@ public class OffLatticeAutomata {
     public void run() {
 
         CellIdxMethod cim;
+        states.add(board.getParticles());
         for(int timeFrame = 0; timeFrame < iterations; timeFrame++) {
             if (timeFrame%100 == 0){
                 System.out.println("Iteracion: " + timeFrame);
@@ -50,8 +51,9 @@ public class OffLatticeAutomata {
                 if(angles.size() > 0) {
                     newTheta = averageAngleVelocityOfParticles(angles);
                 }
-                newState.add(p.nextState(newTheta, L, periodicOutline, timeFrame));
+                newState.add(p.nextState(newTheta, L));
             }
+            states.add(newState);
             board.sortBoard(newState);
         }
     }
@@ -83,6 +85,10 @@ public class OffLatticeAutomata {
     public double getVaStdDev(double mean){
         return StatUtils.variance(vaEntries.subList(iterations/2, iterations-1).stream()
                 .mapToDouble(va -> va).toArray(), mean);
+    }
+
+    public List<List<Particle>> getStates() {
+        return states;
     }
 
     private double averageAngleVelocityOfParticles(final List<Double> angles) {

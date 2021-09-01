@@ -38,19 +38,12 @@ public class AutomataSimulation {
         } else {
             board = inputBoard((String) data.get("staticFile"), (String) data.get("dynamicFile"));
         }
-//        List<Particle> particles = new ArrayList<>();
-//        particles.add(new Particle(0, 0.5, 0.5, 0, 0.03, 0));
-//        particles.add(new Particle(1, 0.01, 0.01, 0, 0.03, 0));
-//        particles.add(new Particle(2, 0.55, 0.5, 0, 0.03, 0));
-//        particles.add(new Particle(3, 0.99, 0.99, 0, 0.03, 0));
-//        particles.add(new Particle(4, 1.5, 1.5, 0, 0.03, 0));
-//        board = new Board(4,4,particles);
 
         assert board != null;
         final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v, iterations);
 
         automata.run();
-        visual(board.getParticles(), iterations);
+        visual(automata.getStates());
         automata.writeVaCSV();
     }
 
@@ -101,12 +94,12 @@ public class AutomataSimulation {
         return null;
     }
 
-    private static void visual(List<Particle> particles, int frames) {
+    private static void visual(List<List<Particle>> states) {
         String fileName = "positions";
         try {
             FileWriter pos = new FileWriter(fileName + ".xyz", false);
             BufferedWriter buffer = new BufferedWriter(pos);
-            for(int timeFrame=0; timeFrame<=frames; timeFrame++) {
+            for(List<Particle> particles : states) {
                 buffer.write(String.valueOf(particles.size()));
                 buffer.newLine();
                 buffer.newLine();

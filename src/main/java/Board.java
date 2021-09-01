@@ -93,7 +93,7 @@ public class Board {
         return new Board(l, m, particles);
     }
 
-    public static Board getRandomBoard(int n, double l, int m, double r, double v, int iterations) {
+    public static Board getRandomBoard(int n, double l, int m, double r, double v) {
 
         List<Particle> particles = new ArrayList<>();
 

@@ -15,7 +15,7 @@ public class Particle {
         this.state = new State(x,y,v,theta);
     }
 
-    public Particle nextState(double newTheta, double L, boolean periodicOutline, int lastFrame) {
+    public Particle nextState(double newTheta, double L) {
         return new Particle(id, nextPosition(state.getX(), state.getVX(), L),
                 nextPosition(state.getY(), state.getVY(), L),
                 0, this.v, newTheta);
