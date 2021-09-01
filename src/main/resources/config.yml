@@ -4,9 +4,9 @@ randomize: true
 iterations: 1000
 
 # N, L, eta
-totalParticles: 100
-boardLength: 7.0
-eta: 2.0
+totalParticles: 300
+boardLength: 25.0
+eta: 0.1
 absV: 0.03
 
 # Archivos de entrada
@@ -14,7 +14,7 @@ staticFile: "sds-tp2/src/main/resources/newStatic.txt"
 dynamicFile: "sds-tp2/src/main/resources/newDynamic.txt"
 
 # Rc y condición de borde
-radius: 0.1
+radius: 1.0
 periodicOutline: true
 
 # Configuraciones para el benchmark

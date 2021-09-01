@@ -19,8 +19,9 @@ public class CellIdxMethod {
         }
 
         this.rc = rc;
-        neighboursMap = new HashMap<>();
-        for (int i = 0; i < M * M; i++) {
+
+        neighboursMap = new HashMap<>(board.getParticles().size());
+        for (int i = 0; i < board.getParticles().size(); i++) {
             neighboursMap.put(i, new HashSet<>());
         }
     }
@@ -78,51 +79,56 @@ public class CellIdxMethod {
         }
     }
 
-    private void addNeighboursToCells(Map<Integer, Set<Particle>> neighbours, int currentIdx, int neighbourIdx) {
+    private void addNeighboursToCells(int currentIdx, int neighbourIdx) {
         if(neighbourIdx != OUT_OF_BOUNDS) {
             List<Particle> currentCell = board.getCell(currentIdx);
-            if(currentIdx != neighbourIdx) {
-                neighbours.get(currentIdx).addAll(board.getCell(neighbourIdx));
-                if(currentCell != null)
-                    neighbours.get(neighbourIdx).addAll(currentCell);
-            } else if(currentCell != null) {
-                neighbours.get(currentIdx).addAll(currentCell);
+            for(Particle p : currentCell){
+                for(Particle n : board.getCell(neighbourIdx)){
+                    if (p.calculateDistance(n, board.getL(), per) < rc){
+                        neighboursMap.get(p.getId()).add(n);
+                        neighboursMap.get(n.getId()).add(p);
+                    }
+                }
             }
         }
     }
 
-    public List<Particle> getNeighboursOf(Particle particle, int timeFrame) {
-        if (!board.getParticles().contains(particle)){
-            throw new IllegalArgumentException("Particle does not belong to this board");
-        }
-        List<Particle> ret = new ArrayList<>();
-        int idx = board.calculateCellIndexOnBoard(particle.getState(timeFrame).getX(), particle.getState(timeFrame).getY());
-        Set<Particle> neighbours = neighboursMap.get(idx);
-        for (Particle n : neighbours){
-            if (particle.calculateDistance(n, board.getL(), per, timeFrame) < rc){
-                ret.add(n);
-            }
-        }
-        return ret;
-    }
+//    public List<Particle> getNeighboursOf(Particle particle, int timeFrame) {
+//        if (!board.getParticles().contains(particle)){
+//            throw new IllegalArgumentException("Particle does not belong to this board");
+//        }
+//        List<Particle> ret = new ArrayList<>();
+//        int idx = board.calculateCellIndexOnBoard(particle.getState(timeFrame).getX(), particle.getState(timeFrame).getY());
+//        Set<Particle> neighbours = cellsMap.get(idx);
+//        for (Particle n : neighbours){
+//            if (particle.calculateDistance(n, board.getL(), per, timeFrame) < rc){
+//                ret.add(n);
+//            }
+//        }
+//        return ret;
+//    }
 
-//  public Map<Integer, Set<Particle>> calculateNeighbours(){
+    //  public Map<Integer, Set<Particle>> calculateNeighbours(){
     public void calculateNeighbours(){
         for (int i=0; i<M*M; i++) {
             int row = i/M;
             int col = i%M;
             //add this cell particles as neighbours
-            addNeighboursToCells(neighboursMap, i, i);
+            addNeighboursToCells(i, i);
             //add right neighbours
-            addNeighboursToCells(neighboursMap, i, getRightIndex(i, row, col, per));
+            addNeighboursToCells(i, getRightIndex(i, row, col, per));
             //add upper right neighbours
-            addNeighboursToCells(neighboursMap, i, getUpperRightIndex(row, col, per));
+            addNeighboursToCells(i, getUpperRightIndex(row, col, per));
             //add lower right neighbours
-            addNeighboursToCells(neighboursMap, i, getLowerRightIndex(row, col, per));
+            addNeighboursToCells(i, getLowerRightIndex(row, col, per));
             //add lower neighbours
-            addNeighboursToCells(neighboursMap, i, getLowerIndex(row, col, per));
+            addNeighboursToCells(i, getLowerIndex(row, col, per));
         }
 //        return neighboursMap;
+    }
+
+    public Map<Integer, Set<Particle>> getNeighboursMap() {
+        return neighboursMap;
     }
 
     public Board getBoard() {

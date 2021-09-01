@@ -7,31 +7,31 @@ public class Board {
 
     private final double L;
     private final int M;
-    private final List<Particle> particles;
+    private List<Particle> particles;
     Map<Integer, List<Particle>> cells;
 
     public Board(double l, int m, List<Particle> particles) {
         L = l;
         M = m;
-        this.particles = particles;
         this.cells = new HashMap<>();
-        sortBoard();
+        sortBoard(particles);
     }
 
-    public void sortBoard() {
+    public void sortBoard(List<Particle> newParticles) {
         for (int i = 0; i < M * M; i++) {
             cells.put(i, new ArrayList<>());
         }
+        this.particles = newParticles;
         divideParticles();
     }
 
 //  public Map<Integer, List<Particle>> divideParticles(List<Particle> particles){
     public void divideParticles(){
         for(Particle p : particles){
-            if (p.getLastState().getX() < 0 || p.getLastState().getX() > L || p.getLastState().getY() < 0 || p.getLastState().getY() > L){
+            if (p.getState().getX() < 0 || p.getState().getX() > L || p.getState().getY() < 0 || p.getState().getY() > L){
                 throw new IllegalArgumentException("Partícula fuera de los límites.");
             }
-            cells.get(calculateCellIndexOnBoard(p.getLastState().getX(), p.getLastState().getY())).add(p);
+            cells.get(calculateCellIndexOnBoard(p.getState().getX(), p.getState().getY())).add(p);
         }
     }
 
@@ -41,7 +41,7 @@ public class Board {
         return i + M*j;
     }
 
-    public static Board getRandomBoardFile(int n, double l, int m, double r, double v) {
+    public static Board getRandomBoardFile(int n, double l, int m, double r, double v, int iterations) {
 
         List<Particle> particles = new ArrayList<>();
 
@@ -93,7 +93,7 @@ public class Board {
         return new Board(l, m, particles);
     }
 
-    public static Board getRandomBoard(int n, double l, int m, double r, double v) {
+    public static Board getRandomBoard(int n, double l, int m, double r, double v, int iterations) {
 
         List<Particle> particles = new ArrayList<>();
 

@@ -4,26 +4,21 @@ import java.util.Objects;
 
 public class Particle {
 
-    private final long id;
+    private final int id;
     private final double radius, v;
-    private final List<State> states;
+    private final State state;
 
-    public Particle(long id, double x, double y, double radius, double v, double theta) {
+    public Particle(int id, double x, double y, double radius, double v, double theta) {
         this.id = id;
         this.radius = radius;
         this.v = v;
-        states = new ArrayList<>();
-        states.add(new State(x,y,v,theta));
+        this.state = new State(x,y,v,theta);
     }
 
-    public void nextState(double newTheta, double L, boolean periodicOutline, int lastFrame) {
-        State lastState = getState(lastFrame);
-//      states.add(new State(nextPosition(lastState.getX() + lastState.getVX(), L, periodicOutline),
-//                      nextPosition(lastState.getY() + lastState.getVY(), L, periodicOutline),
-        states.add(new State(nextPosition(lastState.getX(), lastState.getVX(), L),
-                        nextPosition(lastState.getY(), lastState.getVY(), L),
-                        this.v,
-                        newTheta));
+    public Particle nextState(double newTheta, double L, boolean periodicOutline, int lastFrame) {
+        return new Particle(id, nextPosition(state.getX(), state.getVX(), L),
+                nextPosition(state.getY(), state.getVY(), L),
+                0, this.v, newTheta);
     }
 
     // SIEMPRE TIENE PERIODIC OUTLINE
@@ -31,19 +26,6 @@ public class Particle {
         double aux = (coord + relV) % L;
         return aux < 0 ? aux + L : aux;
     }
-
-//    private double nextPosition(double coordinate, double L, boolean periodicOutline){
-//        double ret = coordinate;
-//
-//        if(periodicOutline) {
-//            if(coordinate >= L) {
-//                ret = coordinate - L;
-//            } else if(coordinate < 0) {
-//                ret = coordinate + L;
-//            }
-//        }
-//        return ret;
-//    }
 
     private double distanceFromAxis(double ax1, double ax2, double L, boolean periodicOutline){
         double distance = Math.abs(ax1 - ax2);
@@ -56,20 +38,17 @@ public class Particle {
         return distance;
     }
 
-    public double calculateDistance(Particle p, double L, boolean periodicOutline, int timeFrame) {
-        State state = getState(timeFrame);
-        double x = distanceFromAxis(state.getX(), p.getState(timeFrame).getX(), L, periodicOutline);
-        double y = distanceFromAxis(state.getY(), p.getState(timeFrame).getY(), L, periodicOutline);
+    public double calculateDistance(Particle p, double L, boolean periodicOutline) {
+        double x = distanceFromAxis(state.getX(), p.getState().getX(), L, periodicOutline);
+        double y = distanceFromAxis(state.getY(), p.getState().getY(), L, periodicOutline);
 
         return Math.sqrt(x*x + y*y) - this.radius - p.getRadius();
     }
 
 
     // Getters
-    public long getId() { return id; }
-    public List<State> getStates() { return states; }
-    public State getState(int timeFrame) { return states.get(timeFrame); }
-    public State getLastState() { return states.get(states.size()-1); }
+    public int getId() { return id; }
+    public State getState() { return state; }
     public double getV() { return v; }
     public double getRadius() { return radius; }
 
@@ -79,27 +58,27 @@ public class Particle {
         if (this == o) return true;
         if (!(o instanceof Particle)) return false;
         Particle particle = (Particle) o;
-        return id == particle.id && radius == particle.radius && Objects.equals(states, particle.states);
+        return id == particle.id && radius == particle.radius;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, states, radius);
+        return Objects.hash(id, radius);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder buffer = new StringBuilder("Particle{ ID = " + id + ", V = " + v + ", Radius = " + radius);
-        buffer.append("\n\tStates = { ");
-        int i=0;
-        for(State s : states) {
-            buffer.append("t");
-            buffer.append(i++);
-            buffer.append(s);
-        }
-        buffer.append(" }");
-        return buffer.toString();
-    }
+//    @Override
+//    public String toString() {
+//        StringBuilder buffer = new StringBuilder("Particle{ ID = " + id + ", V = " + v + ", Radius = " + radius);
+//        buffer.append("\n\tStates = { ");
+//        int i=0;
+//        for(State s : states) {
+//            buffer.append("t");
+//            buffer.append(i++);
+//            buffer.append(s);
+//        }
+//        buffer.append(" }");
+//        return buffer.toString();
+//    }
 
 
     public static class State{
@@ -136,15 +115,15 @@ public class Particle {
             return vy;
         }
 
-        @Override
-        public String toString() {
-            return " [" +
-                    "x=" + x +
-                    ", y=" + y +
-                    ", vx=" + vx +
-                    ", vy=" + vy +
-                    ", theta=" + theta +
-                    "]";
-        }
+//        @Override
+//        public String toString() {
+//            return " [" +
+//                    "x=" + x +
+//                    ", y=" + y +
+//                    ", vx=" + vx +
+//                    ", vy=" + vy +
+//                    ", theta=" + theta +
+//                    "]";
+//        }
     }
 }

@@ -6,6 +6,7 @@ import java.util.*;
 public class AutomataSimulation {
 
     private static double rc;
+    private static int iterations;
 
     public static void main(String[] args) throws IOException {
 
@@ -26,23 +27,30 @@ public class AutomataSimulation {
         double eta = (double) data.get("eta");
         boolean per = (boolean) data.get("periodicOutline");
         double v = (double) data.get("absV");
+        iterations = (int) data.get("iterations");
 
         Board board;
         if((boolean) data.get("randomize")) {
             int n = (int) data.get("totalParticles");
             double l = (double) data.get("boardLength");
             int m = optM(l);
-            board = Board.getRandomBoardFile(n,l,m,0, v);
+            board = Board.getRandomBoardFile(n,l,m,0, v, iterations);
         } else {
             board = inputBoard((String) data.get("staticFile"), (String) data.get("dynamicFile"));
         }
+//        List<Particle> particles = new ArrayList<>();
+//        particles.add(new Particle(0, 0.5, 0.5, 0, 0.03, 0));
+//        particles.add(new Particle(1, 0.01, 0.01, 0, 0.03, 0));
+//        particles.add(new Particle(2, 0.55, 0.5, 0, 0.03, 0));
+//        particles.add(new Particle(3, 0.99, 0.99, 0, 0.03, 0));
+//        particles.add(new Particle(4, 1.5, 1.5, 0, 0.03, 0));
+//        board = new Board(4,4,particles);
 
         assert board != null;
-        final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v);
+        final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v, iterations);
 
-        int i = (int) data.get("iterations");
-        automata.run(i);
-        visual(board.getParticles(), i);
+        automata.run();
+        visual(board.getParticles(), iterations);
         automata.writeVaCSV();
     }
 
@@ -103,7 +111,7 @@ public class AutomataSimulation {
                 buffer.newLine();
                 buffer.newLine();
                 for(Particle p : particles) {
-                    buffer.write(p.getId() + " " + p.getState(timeFrame).getX() + " " + p.getState(timeFrame).getY() + " " + p.getState(timeFrame).getVX() + " " + p.getState(timeFrame).getVY() + " " + p.getState(timeFrame).getTheta());
+                    buffer.write(p.getId() + " " + p.getState().getX() + " " + p.getState().getY() + " " + p.getState().getVX() + " " + p.getState().getVY() + " " + p.getState().getTheta());
                     buffer.newLine();
                 }
             }

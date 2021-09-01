@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class OffLatticeAutomata {
 
@@ -13,48 +12,51 @@ public class OffLatticeAutomata {
     private final double rc;
     private final boolean periodicOutline;
     private final double v;
+    private final int iterations;
+    private final List<Particle> states;
     private final Board board;
-    private final ArrayList<VaEntry> vaEntries;
+    private final List<Double> vaEntries;
 
-    public OffLatticeAutomata(double l, double eta, double rc, boolean periodicOutline, Board initialBoard, double v) {
+    public OffLatticeAutomata(double l, double eta, double rc, boolean periodicOutline, Board initialBoard, double v, int iterations) {
         L = l;
         this.v = v;
         this.rc = rc;
         this.eta = eta;
         this.board = initialBoard;
-        this.vaEntries = new ArrayList<>();
+        this.vaEntries = new ArrayList<>(iterations);
+        this.states = new ArrayList<>(iterations);
         this.periodicOutline = periodicOutline;
+        this.iterations = iterations;
     }
 
-    public void run(int maxIterations) {
+    public void run() {
 
         CellIdxMethod cim;
-        for(int timeFrame = 0; timeFrame < maxIterations; timeFrame++) {
+        for(int timeFrame = 0; timeFrame < iterations; timeFrame++) {
             if (timeFrame%100 == 0){
                 System.out.println("Iteracion: " + timeFrame);
             }
             cim = new CellIdxMethod(board, rc, periodicOutline);
             cim.calculateNeighbours();
-            calculateVa(board.getParticles(), timeFrame);
+            calculateVa(board.getParticles());
+            List<Particle> newState = new ArrayList<>(board.getParticles().size());
             for(Particle p : board.getParticles()) {
-                double newTheta = p.getLastState().getTheta();
+                double newTheta = p.getState().getTheta();
                 List<Double> angles = new ArrayList<>();
-                for(Particle neigh : cim.getNeighboursOf(p,timeFrame)) {
-                    if (p.calculateDistance(neigh, L, periodicOutline, timeFrame) < rc){
-                        angles.add(neigh.getState(timeFrame).getTheta());
-                    }
+                Map<Integer, Set<Particle>> neighbours = cim.getNeighboursMap();
+                for(Particle neigh : neighbours.get(p.getId())) {
+                    angles.add(neigh.getState().getTheta());
                 }
                 if(angles.size() > 0) {
                     newTheta = averageAngleVelocityOfParticles(angles);
                 }
-                p.nextState(newTheta, L, periodicOutline, timeFrame);
-
+                newState.add(p.nextState(newTheta, L, periodicOutline, timeFrame));
             }
-            board.sortBoard();
+            board.sortBoard(newState);
         }
     }
 
-    public List<VaEntry> getVas() {
+    public List<Double> getVas() {
         return vaEntries;
     }
 
@@ -62,8 +64,10 @@ public class OffLatticeAutomata {
         FileWriter out = new FileWriter("va" + ".csv",false);
         BufferedWriter buffer = new BufferedWriter(out);
         buffer.write("t,va\n");
-        for(VaEntry va : vaEntries) {
-            buffer.write(va.toString());
+        int i = 0;
+        for(Double va : vaEntries) {
+            buffer.write(i + "," + va);
+            i++;
             buffer.newLine();
         }
         buffer.flush();
@@ -72,13 +76,13 @@ public class OffLatticeAutomata {
     }
 
     public double getMean(){
-        return StatUtils.geometricMean(vaEntries.stream().filter(e -> e.t < vaEntries.size()/2)
-                .mapToDouble(VaEntry::getVa).toArray());
+        return StatUtils.geometricMean(vaEntries.subList(iterations/2, iterations-1).stream()
+                .mapToDouble(va -> va).toArray());
     }
 
     public double getVaStdDev(double mean){
-        return StatUtils.variance(vaEntries.stream().filter(e -> e.t < vaEntries.size()/2)
-                .mapToDouble(VaEntry::getVa).toArray(), mean);
+        return StatUtils.variance(vaEntries.subList(iterations/2, iterations-1).stream()
+                .mapToDouble(va -> va).toArray(), mean);
     }
 
     private double averageAngleVelocityOfParticles(final List<Double> angles) {
@@ -94,14 +98,14 @@ public class OffLatticeAutomata {
         ) + rand.nextDouble()*eta - eta/2;
     }
 
-    private void calculateVa(List<Particle> particles, int timeFrame) {
-        double vxSum = particles.stream().mapToDouble(p -> p.getState(timeFrame).getVX()).sum();
-        double vySum = particles.stream().mapToDouble(p -> p.getState(timeFrame).getVY()).sum();
+    private void calculateVa(List<Particle> particles) {
+        double vxSum = particles.stream().mapToDouble(p -> p.getState().getVX()).sum();
+        double vySum = particles.stream().mapToDouble(p -> p.getState().getVY()).sum();
         double totalVSum = particles.stream().mapToDouble(Particle::getV).sum();
 
         double va = Math.hypot(vxSum, vySum) / totalVSum;
 
-        vaEntries.add(new VaEntry(timeFrame, va));
+        vaEntries.add(va);
     }
 
 
@@ -135,27 +139,4 @@ public class OffLatticeAutomata {
 //
 //        return boards;
 //    }
-
-    private static class VaEntry {
-        private final int t;
-        private final double va;
-
-        public VaEntry(int t, double va) {
-            this.t = t;
-            this.va = va;
-        }
-
-        public int getT() {
-            return t;
-        }
-
-        public double getVa() {
-            return va;
-        }
-
-        @Override
-        public String toString() {
-            return t + "," + va;
-        }
-    }
 }
