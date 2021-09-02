@@ -1,11 +1,11 @@
 randomize: true
 
 # Total time steps
-iterations: 1000
+iterations: 10000
 
 # N, L, eta
 totalParticles: 300
-boardLength: 25.0
+boardLength: 4.0
 eta: 0.1
 absV: 0.03
 
@@ -20,8 +20,9 @@ periodicOutline: true
 # Configuraciones para el benchmark
 benchmark:
   particles:
-    - 10
+    - 40
     - 100
+    - 400
   simulations: 50
 
 # Default: output.txt

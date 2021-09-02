@@ -16,6 +16,7 @@ public class OffLatticeAutomata {
     private final List<List<Particle>> states;
     private final Board board;
     private final List<Double> vaEntries;
+    private final Random rand;
 
     public OffLatticeAutomata(double l, double eta, double rc, boolean periodicOutline, Board initialBoard, double v, int iterations) {
         L = l;
@@ -27,6 +28,8 @@ public class OffLatticeAutomata {
         this.states = new ArrayList<>(iterations);
         this.periodicOutline = periodicOutline;
         this.iterations = iterations;
+        this.rand = new Random(System.currentTimeMillis());
+
     }
 
     public void run() {
@@ -34,7 +37,7 @@ public class OffLatticeAutomata {
         CellIdxMethod cim;
         states.add(board.getParticles());
         for(int timeFrame = 0; timeFrame < iterations; timeFrame++) {
-            if (timeFrame%100 == 0){
+            if (timeFrame%1000 == 0){
                 System.out.println("Iteracion: " + timeFrame);
             }
             cim = new CellIdxMethod(board, rc, periodicOutline);
@@ -56,10 +59,6 @@ public class OffLatticeAutomata {
             states.add(newState);
             board.sortBoard(newState);
         }
-    }
-
-    public List<Double> getVas() {
-        return vaEntries;
     }
 
     public void writeVaCSV() throws IOException {
@@ -92,12 +91,9 @@ public class OffLatticeAutomata {
     }
 
     private double averageAngleVelocityOfParticles(final List<Double> angles) {
-        double avgSin = angles.stream().mapToDouble(a -> a)
-                .map(Math::sin).average().orElse(0.0);
-        double avgCos = angles.stream().mapToDouble(a -> a)
-                .map(Math::cos).average().orElse(0.0);
+        double avgSin = angles.stream().mapToDouble(Math::sin).sorted().average().orElse(0.0);
+        double avgCos = angles.stream().mapToDouble(Math::cos).sorted().average().orElse(0.0);
 
-        Random rand = new Random(System.currentTimeMillis());
         return Math.atan2(
                 avgSin,
                 avgCos

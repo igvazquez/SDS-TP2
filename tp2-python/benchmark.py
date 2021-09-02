@@ -1,18 +1,10 @@
 from matplotlib import pyplot as plt, animation
-from numpy import arctan, pi, sqrt
+from numpy import pi
 import pandas as pd
-import numpy as np
 
-va = pd.read_csv("va.csv", sep=",")
 benchmark = pd.read_csv("benchmark.csv", sep=",")
 
 benchmark = benchmark.query('n == 40')
-
-plt.figure(200)
-plt.plot(va['t'], va['va'])
-plt.xlabel("Iteration")
-plt.ylabel("VA")
-plt.ylim([0,1])
 
 plt.figure(300)
 plt.plot(benchmark['eta'], benchmark['va'])

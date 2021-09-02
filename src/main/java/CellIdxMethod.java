@@ -14,9 +14,9 @@ public class CellIdxMethod {
         this.per = per;
         M = board.getM();
 
-        if (rc < board.getL()/M){
-            throw new IllegalArgumentException("El radio de interaccion no puede ser mayor que L/M");
-        }
+//        if (rc < board.getL()/M){
+//            throw new IllegalArgumentException("El radio de interaccion no puede ser mayor que L/M");
+//        }
 
         this.rc = rc;
 

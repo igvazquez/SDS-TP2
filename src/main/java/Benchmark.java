@@ -35,7 +35,7 @@ public class Benchmark {
         double etaStep = 2*Math.PI/simulations;
 
         double l = (double) data.get("boardLength");
-        int m = optM(l);
+        double density = benchmarkParticles.get(0)/(l*l);
         int iterations = (int) data.get("iterations");
 
         FileWriter benchmark = new FileWriter("benchmark.csv", false);
@@ -47,7 +47,8 @@ public class Benchmark {
             for (int i = 0; i < simulations; i++) {
                 System.out.println("N = " + n);
                 System.out.println("sim = " + i);
-                Board board = Board.getRandomBoard(n,l,m,0, v);
+                double length = Math.sqrt(n/density);
+                Board board = Board.getRandomBoard(n,length,optM(length),0, v);
                 OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v, iterations);
                 automata.run();
                 double mean = automata.getMean();
