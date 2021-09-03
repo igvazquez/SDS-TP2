@@ -1,12 +1,12 @@
 randomize: true
 
 # Total time steps
-iterations: 10000
+iterations: 2500
 
 # N, L, eta
-totalParticles: 300
-boardLength: 4.0
-eta: 0.1
+totalParticles: 30
+boardLength: 20.0
+eta: 0.5
 absV: 0.03
 
 # Archivos de entrada
@@ -20,10 +20,14 @@ periodicOutline: true
 # Configuraciones para el benchmark
 benchmark:
   particles:
-    - 40
+    - 10
     - 100
     - 400
   simulations: 50
 
-# Default: output.txt
-fileName: ""
+densityBenchmark:
+  maxDensity: 10.0
+  simulations: 50
+
+# Default: particles.xyz
+fileName: "va-vs-density-noise-1"

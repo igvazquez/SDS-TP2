@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Benchmark {
+public class NoiseBenchmark {
 
     private static double rc;
 
@@ -32,13 +32,17 @@ public class Benchmark {
         LinkedHashMap<String, Object> benchmarkData = (LinkedHashMap<String, Object>) data.get("benchmark");
         List<Integer> benchmarkParticles = (ArrayList<Integer>) benchmarkData.get("particles");
         Integer simulations = (Integer) benchmarkData.get("simulations");
+        String fileName = (String) benchmarkData.get("fileName");
+        if (fileName.equals("")){
+            fileName = "noiseBenchmark.csv";
+        }
         double etaStep = 2*Math.PI/simulations;
 
         double l = (double) data.get("boardLength");
         double density = benchmarkParticles.get(0)/(l*l);
         int iterations = (int) data.get("iterations");
 
-        FileWriter benchmark = new FileWriter("benchmark.csv", false);
+        FileWriter benchmark = new FileWriter(fileName+".csv", false);
         BufferedWriter buffer = new BufferedWriter(benchmark);
         buffer.write("n,va,eta,stdDev\n");
 

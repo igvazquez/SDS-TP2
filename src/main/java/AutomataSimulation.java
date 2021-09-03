@@ -43,7 +43,7 @@ public class AutomataSimulation {
         final OffLatticeAutomata automata = new OffLatticeAutomata(board.getL(), eta, rc, per, board, v, iterations);
 
         automata.run();
-        visual(automata.getStates());
+        visual(automata.getStates(), (String) data.get("fileName"));
         automata.writeVaCSV();
     }
 
@@ -94,8 +94,10 @@ public class AutomataSimulation {
         return null;
     }
 
-    private static void visual(List<List<Particle>> states) {
-        String fileName = "positions";
+    private static void visual(List<List<Particle>> states, String fileName) {
+        if(fileName.equals("")){
+            fileName = "positions";
+        }
         try {
             FileWriter pos = new FileWriter(fileName + ".xyz", false);
             BufferedWriter buffer = new BufferedWriter(pos);

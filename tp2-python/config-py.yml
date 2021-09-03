@@ -1,0 +1,17 @@
+# density vs va
+densityBenchmark:
+  maxDensity: 10.0
+  simulations: 50
+  fileName: "va-vs-density-noise-0.5.csv"
+
+noiseBenchmark:
+  particles:
+    - 10
+    - 100
+    - 400
+  simulations: 50
+  fileName: "noiseBenchmark.csv"
+
+vaBenchmark:
+  iterations: 2500
+  fileName: "noiseBenchmark.csv"
